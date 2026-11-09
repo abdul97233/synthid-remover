@@ -20,6 +20,13 @@ function crc32(data: Uint8Array, crc = 0xffffffff): number {
   return crc
 }
 
+/** Standard CRC-32 of a byte array (as used by ZIP and PNG). */
+export function crc32Of(...chunks: Uint8Array[]): number {
+  let crc = 0xffffffff
+  for (const c of chunks) crc = crc32(c, crc)
+  return (crc ^ 0xffffffff) >>> 0
+}
+
 async function blobCrc(blob: Blob): Promise<number> {
   const CHUNK = 8 * 1024 * 1024
   let crc = 0xffffffff

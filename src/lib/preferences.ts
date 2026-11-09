@@ -11,10 +11,12 @@ export interface Preferences {
   autoClean: boolean
   /** Output names: "photo-cleaned.jpg" (suffix) or "photo.jpg" (original). */
   naming: 'suffix' | 'original'
+  /** Advanced mode: experimental "add metadata" tool (opt-in). */
+  tagger: boolean
 }
 
 const KEY = 'sr-prefs'
-const DEFAULTS: Preferences = { mode: 'simple', autoClean: false, naming: 'suffix' }
+const DEFAULTS: Preferences = { mode: 'simple', autoClean: false, naming: 'suffix', tagger: false }
 
 function load(): Preferences {
   try {
@@ -25,6 +27,7 @@ function load(): Preferences {
       mode: p.mode === 'advanced' ? 'advanced' : 'simple',
       autoClean: p.autoClean === true,
       naming: p.naming === 'original' ? 'original' : 'suffix',
+      tagger: p.tagger === true,
     }
   } catch {
     return DEFAULTS

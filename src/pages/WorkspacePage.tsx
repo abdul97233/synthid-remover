@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { CloudUpload, ScanSearch, Eraser, Download, MousePointerClick, FileJson, Zap, SlidersHorizontal } from 'lucide-react'
+import { CloudUpload, ScanSearch, Eraser, Download, MousePointerClick, FileJson, Zap, SlidersHorizontal, FlaskConical } from 'lucide-react'
+import { ExperimentalTagger } from '../components/workspace/ExperimentalTagger'
 import { useMediaProcessor } from '../hooks/useMediaProcessor'
 import { partitionFiles, type Rejection } from '../lib/fileValidation'
 import { downloadAllCleaned, downloadReport } from '../lib/output'
@@ -240,6 +241,12 @@ export function WorkspacePage() {
                   onChange={(v) => setPreference('autoClean', v)}
                 />
                 <NamingSelect value={prefs.naming} onChange={(v) => setPreference('naming', v)} />
+                <PrefSwitch
+                  icon={FlaskConical}
+                  label="Experimental: add metadata"
+                  checked={prefs.tagger}
+                  onChange={(v) => setPreference('tagger', v)}
+                />
                 <button
                   type="button"
                   onClick={() => downloadReport(items)}
@@ -249,6 +256,7 @@ export function WorkspacePage() {
                 </button>
               </div>
               {zipError && <p className="text-sm text-danger">{zipError}</p>}
+              {prefs.tagger && <ExperimentalTagger items={items} />}
 
               <RejectionNotice rejections={rejections} onDismiss={() => setRejections([])} />
 
