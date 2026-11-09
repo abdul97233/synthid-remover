@@ -5,8 +5,8 @@
   "start_url": "./#/app",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#07080c",
-  "theme_color": "#07080c",
+  "background_color": "#fbfbfd",
+  "theme_color": "#fbfbfd",
   "categories": ["utilities", "photo", "productivity"],
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },

@@ -18,9 +18,8 @@
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="author" content="SynthID Remover" />
     <meta name="application-name" content="SynthID Remover" />
-    <meta name="color-scheme" content="dark light" />
-    <meta name="theme-color" content="#07080c" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fbfbfd" />
 
     <!-- Icons / PWA -->
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
@@ -76,10 +75,11 @@
       (function () {
         try {
           var t = localStorage.getItem('sr-theme');
-          var dark = t ? t === 'dark' : !window.matchMedia('(prefers-color-scheme: light)').matches;
+          // New visitors get the light theme; dark only if they chose it via the toggle.
+          var dark = t === 'dark';
           document.documentElement.classList.toggle('dark', dark);
         } catch (e) {
-          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('dark');
         }
       })();
     </script>
