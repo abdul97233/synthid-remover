@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- %CSP% -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <title>SynthID Remover — Check AI Metadata &amp; Clean Image, Audio, Video Files Locally</title>
+    <meta
+      name="description"
+      content="Free, private tool to find AI-generation metadata (C2PA, IPTC, generator tags) and strip EXIF, XMP, IPTC and ID3 from JPG, PNG, WebP, MP3, WAV, MP4 and MOV. Runs 100% in your browser — files never leave your device."
+    />
+    <meta
+      name="keywords"
+      content="SynthID, AI metadata checker, remove EXIF, metadata remover, C2PA checker, content credentials, strip metadata, AI image detector metadata, remove XMP, ID3 tag remover, privacy"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="SynthID Remover" />
+    <meta name="application-name" content="SynthID Remover" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#07080c" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)" />
+
+    <!-- Icons / PWA -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="./favicon-48.png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+
+    <!-- Open Graph / social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SynthID Remover" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="SynthID Remover — Inspect & clean media metadata, locally" />
+    <meta
+      property="og:description"
+      content="Find AI-generation metadata indicators and strip EXIF, XMP, IPTC, ID3 and C2PA from images, audio and video. Free, open source, and your files never leave your device."
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="SynthID Remover — inspect and clean media metadata locally" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SynthID Remover — Inspect & clean media metadata, locally" />
+    <meta
+      name="twitter:description"
+      content="Find AI-generation metadata indicators and strip EXIF, XMP, IPTC, ID3 and C2PA. 100% in your browser."
+    />
+    <!-- %ABSOLUTE_URL_TAGS% -->
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "SynthID Remover",
+        "url": "%SITE_URL%",
+        "description": "Free, privacy-first web app that finds AI-generation metadata indicators and losslessly strips metadata from images, audio and video. All processing happens locally in the browser.",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any (modern web browser)",
+        "browserRequirements": "Requires JavaScript and Web Workers",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "featureList": [
+          "Detect C2PA / Content Credentials, IPTC digitalSourceType and AI generator tags in metadata",
+          "Lossless metadata removal for JPG, PNG, WebP, MP3, WAV, MP4 and MOV",
+          "Side-by-side compare of original and cleaned files",
+          "Batch processing",
+          "Works offline; files are never uploaded"
+        ],
+        "license": "https://opensource.org/licenses/MIT"
+      }
+    </script>
+
+    <script>
+      // Theme bootstrap (functional preference only — never used for tracking).
+      (function () {
+        try {
+          var t = localStorage.getItem('sr-theme');
+          var dark = t ? t === 'dark' : !window.matchMedia('(prefers-color-scheme: light)').matches;
+          document.documentElement.classList.toggle('dark', dark);
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <main style="max-width:640px;margin:64px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.6">
+        <h1>SynthID Remover</h1>
+        <p>
+          A free, privacy-first tool that finds AI-generation metadata indicators (C2PA / Content
+          Credentials, IPTC digitalSourceType, generator tags) and losslessly strips EXIF, XMP, IPTC,
+          ID3 and container metadata from JPG, PNG, WebP, MP3, WAV, MP4 and MOV files.
+        </p>
+        <p>
+          Everything runs locally in your browser, so JavaScript is required. Your files never leave
+          your device. Pixel-level SynthID watermarks cannot be detected or removed by any local tool.
+        </p>
+      </main>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
