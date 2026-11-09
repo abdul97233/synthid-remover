@@ -13,7 +13,7 @@ const STEPS = [
   {
     icon: UploadCloud,
     title: 'Add your files',
-    body: 'Drag & drop images (JPG, PNG, WebP), audio (MP3, WAV) or video (MP4, MOV). Files are read from disk straight into browser memory.',
+    body: 'Drag & drop images (JPG, PNG, WebP), audio (MP3, WAV) or video (MP4, MOV) or PDF documents. Files are read from disk straight into browser memory.',
   },
   {
     icon: ScanSearch,
@@ -75,9 +75,6 @@ export function HowItWorks() {
               <div className="relative z-10 shrink-0">
                 <span className="relative inline-flex size-12 items-center justify-center rounded-2xl border border-line bg-card text-primary shadow-card">
                   <s.icon className="size-5" />
-                  <span className="absolute -right-1.5 -top-1.5 inline-flex size-5 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white ring-4 ring-background">
-                    {i + 1}
-                  </span>
                 </span>
               </div>
               <div className="min-w-0 pt-1 lg:mt-6 lg:max-w-[260px] lg:pt-0">

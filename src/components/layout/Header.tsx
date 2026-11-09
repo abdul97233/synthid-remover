@@ -116,14 +116,23 @@ export function Header() {
     }
   }, [menuOpen])
 
+  // A mouse/touch click (detail > 0) shouldn't leave a focus ring behind, or the
+  // clicked item and the scroll-tracked active item both look selected.
+  // Keyboard activation (detail === 0) keeps focus for accessibility.
+  const releaseFocus = (e: MouseEvent<HTMLElement>) => {
+    if (e.detail > 0) e.currentTarget.blur()
+  }
+
   const onSection = (id: string) => (e: MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
+    releaseFocus(e)
     setMenuOpen(false)
     goToSection(id)
   }
 
   const goHome = (e: MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
+    releaseFocus(e)
     setMenuOpen(false)
     if (route === '/') window.scrollTo({ top: 0, behavior: 'smooth' })
     else window.location.hash = '/'
@@ -208,6 +217,7 @@ export function Header() {
               )}
               <a
                 href="#/labs"
+                onClick={releaseFocus}
                 aria-current={route === '/labs' ? 'page' : undefined}
                 className={cn(
                   'relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors',

@@ -42,7 +42,7 @@ async function run(req: Extract<WorkerRequest, { op: 'scan' | 'strip' }>): Promi
       ctx.postMessage({ id: req.id, type: 'done', result })
     } else {
       ctx.postMessage({ id: req.id, type: 'progress', value: 30 })
-      const result = stripArrayBuffer(bytes, req.file.name)
+      const result = await stripArrayBuffer(bytes, req.file.name)
       bytes = null
       checkCancelled(req.id)
       ctx.postMessage({ id: req.id, type: 'progress', value: 100 })

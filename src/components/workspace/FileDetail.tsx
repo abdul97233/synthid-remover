@@ -12,7 +12,7 @@ import {
   Trash2,
   FileAudio2,
   FileVideo2,
-  FileImage,
+  FileImage, FileText,
   CircleAlert,
 } from 'lucide-react'
 import type { FileItem } from '../../types'
@@ -42,7 +42,7 @@ const TABS: TabItem[] = [
   { id: 'overview', label: 'Info', icon: Info },
 ]
 
-const KIND_ICON = { image: FileImage, audio: FileAudio2, video: FileVideo2 }
+const KIND_ICON = { image: FileImage, audio: FileAudio2, video: FileVideo2, document: FileText }
 
 function AnalyzingSkeleton({ progress }: { progress: number }) {
   return (
@@ -149,7 +149,7 @@ export function FileDetail({
             {thumbUrl ? (
               <img src={thumbUrl} alt="" className="size-full object-cover" />
             ) : (
-              <KindIcon className={cn('size-6', kind === 'audio' ? 'text-cyan' : kind === 'video' ? 'text-accent' : 'text-primary')} aria-hidden="true" />
+              <KindIcon className={cn('size-6', kind === 'audio' ? 'text-cyan' : kind === 'video' ? 'text-accent' : kind === 'document' ? 'text-warn' : 'text-primary')} aria-hidden="true" />
             )}
           </span>
           <div className="min-w-0 flex-1">

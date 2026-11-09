@@ -21,7 +21,7 @@ export function partitionFiles(files: File[]): { accepted: File[]; rejected: Rej
     if (!isSupportedExtension(file.name) && !byMime) {
       rejected.push({
         name: file.name || 'Unnamed file',
-        reason: `Unsupported format (.${ext || 'none'}). Supported: JPG, PNG, WebP, MP3, WAV, MP4, MOV.`,
+        reason: `Unsupported format (.${ext || 'none'}). Supported: JPG, PNG, WebP, MP3, WAV, MP4, MOV, PDF.`,
       })
       continue
     }

@@ -1,6 +1,6 @@
 import { useRef, type KeyboardEvent } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { CloudUpload, FileImage, FileAudio2, FileVideo2, Lock, Plus, ClipboardPaste } from 'lucide-react'
+import { CloudUpload, FileImage, FileAudio2, FileVideo2, FileText, Lock, Plus, ClipboardPaste } from 'lucide-react'
 import { ACCEPT_ATTR } from '../../lib/constants'
 import { cn } from '../../lib/format'
 import { EASE } from '../ui/Motion'
@@ -9,6 +9,7 @@ const FORMAT_GROUPS = [
   { label: 'Images', icon: FileImage, formats: ['JPG', 'PNG', 'WebP'], tone: 'text-primary' },
   { label: 'Audio', icon: FileAudio2, formats: ['MP3', 'WAV'], tone: 'text-cyan' },
   { label: 'Video', icon: FileVideo2, formats: ['MP4', 'MOV'], tone: 'text-accent' },
+  { label: 'Documents', icon: FileText, formats: ['PDF'], tone: 'text-warn' },
 ] as const
 
 /**
@@ -76,7 +77,7 @@ export function Dropzone({
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{dragActive ? 'Drop to add files' : 'Add more files'}</p>
-          <p className="truncate text-xs text-muted">Browse, drop, or paste · JPG PNG WebP MP3 WAV MP4 MOV</p>
+          <p className="truncate text-xs text-muted">Browse, drop, or paste · JPG PNG WebP MP3 WAV MP4 MOV PDF</p>
         </div>
       </div>
     )

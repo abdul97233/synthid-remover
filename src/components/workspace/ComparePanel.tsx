@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Download, Scale, Eraser, Columns2, ImageOff, ArrowRight } from 'lucide-react'
+import { Download, Scale, Eraser, Columns2, ImageOff, FileText, ArrowRight } from 'lucide-react'
 import type { FileItem, MediaKind } from '../../types'
 import { useObjectUrl } from '../../hooks/useObjectUrl'
 import { downloadBlob } from '../../lib/download'
@@ -30,6 +30,14 @@ function Preview({ url, kind, label }: { url: string | null; kind: MediaKind; la
         onError={() => setFailed(url)}
         className="max-h-80 w-auto max-w-full object-contain"
       />
+    )
+  }
+  if (kind === 'document') {
+    return (
+      <span className="flex flex-col items-center gap-2 p-8 text-center text-xs text-muted">
+        <FileText className="size-8 text-warn" aria-hidden="true" />
+        PDF — open the downloaded file to view it.
+      </span>
     )
   }
   if (kind === 'audio') {

@@ -1,6 +1,6 @@
-export type MediaKind = 'image' | 'audio' | 'video'
+export type MediaKind = 'image' | 'audio' | 'video' | 'document'
 
-export type MediaFormat = 'jpeg' | 'png' | 'webp' | 'mp3' | 'wav' | 'mp4' | 'mov' | 'unknown'
+export type MediaFormat = 'jpeg' | 'png' | 'webp' | 'mp3' | 'wav' | 'mp4' | 'mov' | 'pdf' | 'unknown'
 
 export type FileStatus = 'idle' | 'analyzing' | 'cleaning' | 'ready' | 'error'
 

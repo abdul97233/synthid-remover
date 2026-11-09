@@ -56,7 +56,7 @@ export function CleanPanel({
     return (
       <div role="alert" className="flex items-start gap-3 rounded-2xl border border-danger/25 bg-danger/5 p-5 text-sm text-muted">
         <TriangleAlert className="mt-0.5 size-4 shrink-0 text-danger" aria-hidden="true" />
-        This format cannot be cleaned. Supported: JPG, PNG, WebP, MP3, WAV, MP4, MOV.
+        This format cannot be cleaned. Supported: JPG, PNG, WebP, MP3, WAV, MP4, MOV, PDF.
       </div>
     )
   }

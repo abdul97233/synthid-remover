@@ -93,6 +93,7 @@ export async function probeMedia(file: File, kind: MediaKind): Promise<ProbeResu
       const { width, height } = await probeImage(file)
       return { width, height }
     }
+    if (kind === 'document') return {}
     if (kind === 'video') return await probeDurationElement(file, 'video')
     return await probeDurationElement(file, 'audio')
   } catch (e) {

@@ -12,6 +12,7 @@ import {
   BadgeCheck,
   FileAudio,
   FileVideo,
+  FileText,
   Trash2,
   SlidersHorizontal,
   Lock,
@@ -48,6 +49,8 @@ function Thumb({ item }: { item: FileItem }) {
     <span className="relative inline-flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-elevated sm:size-14">
       {kind === 'image' && url ? (
         <img src={url} alt="" className="size-full object-cover" draggable={false} />
+      ) : kind === 'document' ? (
+        <FileText className="size-6 text-warn" aria-hidden="true" />
       ) : kind === 'audio' ? (
         <FileAudio className="size-6 text-accent" aria-hidden="true" />
       ) : (
@@ -85,7 +88,7 @@ function Row({ item, onRemove, shareable }: { item: FileItem; onRemove: () => vo
       case 'working':
         return item.status === 'analyzing' ? 'Checking metadata…' : 'Removing metadata…'
       case 'done':
-        return `${item.clean!.removed.length} metadata item${item.clean!.removed.length === 1 ? '' : 's'} removed · ${formatBytes(ins.removedBytes)} lighter`
+        return `${item.clean!.removed.length} metadata item${item.clean!.removed.length === 1 ? '' : 's'} removed${ins.removedBytes > 0 ? ` · ${formatBytes(ins.removedBytes)} lighter` : ''}`
       case 'clean-already':
         return 'No metadata found — the copy is identical'
       case 'failed':
@@ -142,7 +145,11 @@ function Row({ item, onRemove, shareable }: { item: FileItem; onRemove: () => vo
               {ins.aiFound && <Chip tone="warn" icon={Sparkles} title="AI-generation metadata indicators">{`AI tags ${removedVerb}`}</Chip>}
               {ins.c2pa && <Chip tone="accent" icon={BadgeCheck} title="C2PA / Content Credentials manifest">{`Content Credentials ${removedVerb}`}</Chip>}
               {ins.location && <Chip tone="danger" icon={MapPin} title="GPS / location metadata">{`Location ${removedVerb}`}</Chip>}
-              {ins.device && <Chip tone="neutral" icon={Camera} title="Camera, device, software or author details">{`Device info ${removedVerb}`}</Chip>}
+              {ins.device && (
+                <Chip tone="neutral" icon={Camera} title="Camera, device, software or author details">
+                  {`${kindOf(item) === 'document' ? 'Author info' : 'Device info'} ${removedVerb}`}
+                </Chip>
+              )}
             </div>
           )}
           {shareError && <p className="mt-1 text-xs text-danger">{shareError}</p>}
@@ -237,7 +244,7 @@ export function SimpleWorkspace({
         <RejectionNotice rejections={rejections} onDismiss={onDismissRejections} />
         <ol className="grid gap-3 sm:grid-cols-3">
           {[
-            { icon: CloudUpload, t: 'Drop your files', d: 'Photos, audio or video. Add as many as you like.' },
+            { icon: CloudUpload, t: 'Drop your files', d: 'Photos, audio, video or PDFs. Add as many as you like.' },
             { icon: Wand2, t: 'Cleaned automatically', d: 'Hidden metadata like GPS, camera and AI tags is stripped.' },
             { icon: Download, t: 'Download', d: 'One file, or all of them as a single ZIP.' },
           ].map((s, i) => (

@@ -5,7 +5,7 @@ import { FORMAT_MIME, kindOfExtension } from '../lib/constants'
 export class UnsupportedFormatError extends Error {
   constructor(name: string) {
     super(
-      `Unsupported or unrecognized file format (${name || 'no extension'}). Supported: JPG, PNG, WebP, MP3, WAV, MP4, MOV.`,
+      `Unsupported or unrecognized file format (${name || 'no extension'}). Supported: JPG, PNG, WebP, MP3, WAV, MP4, MOV, PDF.`,
     )
     this.name = 'UnsupportedFormatError'
   }
@@ -13,6 +13,13 @@ export class UnsupportedFormatError extends Error {
 
 /** Detect the real container format from magic bytes (never trust the extension). */
 export function detectFormat(bytes: Uint8Array, name = ''): { format: MediaFormat; mime: string; kind: MediaKind } {
+  // PDF: "%PDF-" must appear within the first 1 KB (some files carry a small preamble).
+  {
+    const head = Math.min(bytes.length - 5, 1024)
+    for (let i = 0; i <= head; i++) {
+      if (bytes[i] === 0x25 && matchesAscii(bytes, i + 1, 'PDF-')) return { format: 'pdf', mime: FORMAT_MIME.pdf, kind: 'document' }
+    }
+  }
   if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
     return { format: 'jpeg', mime: FORMAT_MIME.jpeg, kind: 'image' }
   }

@@ -1,4 +1,4 @@
-import type { ScanResult, StructureReport, MediaFormat, MediaKind, RemovedItem } from './index'
+import type { ScanResult, StructureReport, MediaFormat, MediaKind, MetadataEntry, RemovedItem } from './index'
 
 /** 'cancel' drops a queued or running request (its promise rejects with an AbortError). */
 export type WorkerOp = 'scan' | 'strip' | 'cancel'
@@ -20,6 +20,8 @@ export interface ScanWorkerResult {
   mime: string
   /** Media kind derived from the real (magic-byte) format, not the extension. */
   kind: MediaKind
+  /** Decoded metadata produced in the worker (PDF); images use exifr on the main thread. */
+  metadata?: MetadataEntry[]
 }
 
 export interface StripWorkerResult {

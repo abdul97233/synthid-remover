@@ -59,8 +59,8 @@ export function Hero() {
             {...rise(0.14)}
             className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted sm:text-lg lg:mx-0"
           >
-            Inspect images, audio and video for AI-generation metadata indicators, then strip EXIF,
-            XMP, IPTC, ID3 and container metadata losslessly. A free, privacy-first tool where
+            Inspect images, audio, video and PDFs for AI-generation metadata indicators, then strip EXIF,
+            XMP, IPTC, ID3, PDF info and AI link tracking (utm_source=chatgpt.com) losslessly. A free, privacy-first tool where
             everything happens on your device.
           </motion.p>
 

@@ -103,6 +103,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
     base: './',
+    // ES-module worker so it can lazy-load pdf-lib only when a PDF is processed.
+    worker: { format: 'es' },
     plugins: [react(), tailwindcss(), seo(env.SITE_URL || 'https://abdul97233.github.io/synthid-remover/')],
     build: {
       target: 'es2020',

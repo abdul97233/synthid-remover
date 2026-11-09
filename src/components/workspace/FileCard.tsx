@@ -1,6 +1,6 @@
 import { forwardRef, type KeyboardEvent } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { FileImage, FileAudio2, FileVideo2, Trash2, CircleCheck, CircleAlert } from 'lucide-react'
+import { FileImage, FileAudio2, FileVideo2, FileText, Trash2, CircleCheck, CircleAlert } from 'lucide-react'
 import type { FileItem, MediaKind } from '../../types'
 import { useObjectUrl } from '../../hooks/useObjectUrl'
 import { formatBytes, cn } from '../../lib/format'
@@ -13,12 +13,14 @@ const KIND_ICON: Record<MediaKind, typeof FileImage> = {
   image: FileImage,
   audio: FileAudio2,
   video: FileVideo2,
+  document: FileText,
 }
 
 const KIND_TONE: Record<MediaKind, string> = {
   image: 'text-primary bg-primary/10',
   audio: 'text-cyan bg-cyan/10',
   video: 'text-accent bg-accent/10',
+  document: 'text-warn bg-warn/10',
 }
 
 /**

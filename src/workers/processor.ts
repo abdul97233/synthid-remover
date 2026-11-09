@@ -8,6 +8,7 @@ import { inspectMp3, stripMp3 } from '../parsers/mp3'
 import { inspectWav, stripWav } from '../parsers/wav'
 import { inspectMp4, stripMp4 } from '../parsers/mp4'
 import { scanBytes } from '../parsers/scanner'
+import { inspectPdf, stripPdf } from '../parsers/pdf'
 
 /**
  * Pure processing pipeline used by the Web Worker (kept free of worker
@@ -103,8 +104,12 @@ export async function scanArrayBuffer(bytes: Uint8Array, name: string, progress:
 
   let structure: Inspection
   let parseError: string | undefined
+  let pdf: Awaited<ReturnType<typeof inspectPdf>> | null = null
   try {
-    structure = inspect(bytes, format)
+    if (format === 'pdf') {
+      pdf = await inspectPdf(bytes)
+      structure = { entries: pdf.entries, notes: pdf.notes }
+    } else structure = inspect(bytes, format)
   } catch (err) {
     // Degrade gracefully: the raw byte scan below still runs over the whole file.
     parseError = err instanceof Error ? err.message : 'The container could not be parsed.'
@@ -115,16 +120,17 @@ export async function scanArrayBuffer(bytes: Uint8Array, name: string, progress:
   }
   progress(12)
 
-  const extra = format === 'png' ? await inflateTexts(pngCompressedTextPayloads(bytes)) : []
+  const extra = format === 'png' ? await inflateTexts(pngCompressedTextPayloads(bytes)) : pdf ? pdf.texts : []
   const scan = await scanBytes(bytes, (p) => progress(12 + Math.round(p * 0.87)), extra)
+  if (pdf) scan.hits.push(...pdf.hits)
   progress(100)
 
-  return { scan, structure: { ...structure, format, mime, parseError }, format, mime, kind }
+  return { scan, structure: { ...structure, format, mime, parseError }, format, mime, kind, metadata: pdf?.metadata }
 }
 
-export function stripArrayBuffer(bytes: Uint8Array, name: string): StripWorkerResult {
+export async function stripArrayBuffer(bytes: Uint8Array, name: string): Promise<StripWorkerResult> {
   const { format, mime } = detectFormat(bytes, name)
-  const { out, removed, notes } = stripBytes(bytes, format)
+  const { out, removed, notes } = format === 'pdf' ? await stripPdf(bytes) : stripBytes(bytes, format)
   // Blob copies exactly the view's range, so no intermediate copy is needed.
   const blob = new Blob([out as Uint8Array<ArrayBuffer>], { type: mime })
   return { blob, size: blob.size, removed, notes, mime, format }

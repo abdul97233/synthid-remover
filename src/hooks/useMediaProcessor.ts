@@ -131,7 +131,7 @@ export function useMediaProcessor() {
         if (signal.aborted) return
         const kind = scanResult.kind ?? extKind
 
-        let metadataEntries: FileItem['metadata'] = undefined
+        let metadataEntries: FileItem['metadata'] = scanResult.metadata?.length ? scanResult.metadata : undefined
         let metaHints: MarkerHit[] = []
         if (kind === 'image') {
           try {
