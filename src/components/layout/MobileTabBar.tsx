@@ -110,7 +110,9 @@ export function MobileTabBar() {
       aria-label="Bottom navigation"
       className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden"
       initial={false}
-      animate={{ y: hidden ? '120%' : '0%' }}
+      // Slide fully out of view, including the raised centre button that overhangs the bar.
+      animate={{ y: hidden ? 'calc(100% + 48px)' : '0%', opacity: hidden ? 0 : 1 }}
+      style={{ pointerEvents: hidden ? 'none' : undefined }}
       transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 36 }}
     >
       <div className="relative mx-auto max-w-md">

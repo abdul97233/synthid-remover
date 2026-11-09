@@ -182,7 +182,7 @@ export function Header() {
             target="_blank"
             rel="noreferrer noopener"
             aria-label="View source on GitHub (opens in a new tab)"
-            className={cn(iconBtn, 'hidden sm:inline-flex')}
+            className={cn(iconBtn, 'max-sm:hidden')}
           >
             <GithubIcon className="size-4" />
           </a>
@@ -198,7 +198,7 @@ export function Header() {
           <button
             ref={menuButtonRef}
             type="button"
-            className={cn(iconBtn, 'hidden md:inline-flex lg:hidden')}
+            className={cn(iconBtn, 'max-md:hidden lg:hidden')}
             onClick={() => setMenuOpen((v) => !v)}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
