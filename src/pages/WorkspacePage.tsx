@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { CloudUpload, ScanSearch, Eraser, Download, MousePointerClick, FileJson, Zap, SlidersHorizontal, FlaskConical } from 'lucide-react'
 import { ExperimentalTagger } from '../components/workspace/ExperimentalTagger'
 import { useMediaProcessor } from '../hooks/useMediaProcessor'
+import { useAutoClean } from '../hooks/useAutoClean'
 import { partitionFiles, type Rejection } from '../lib/fileValidation'
 import { downloadAllCleaned, downloadReport } from '../lib/output'
 import { usePreferences, setPreference } from '../lib/preferences'
@@ -34,19 +35,7 @@ export function WorkspacePage() {
   const autoCleanOn = simple || prefs.autoClean
   const [zipError, setZipError] = useState<string | null>(null)
 
-  // Auto-clean: once a file's analysis succeeds, clean it (each file at most once
-  // automatically, so a failure never loops). The worker runs jobs one at a time.
-  const autoTried = useRef(new Set<string>())
-  const { clean: cleanItem } = processor
-  useEffect(() => {
-    if (!autoCleanOn) return
-    for (const it of items) {
-      if (it.status === 'ready' && it.analysis && !it.clean && it.structure && !it.structure.parseError && !autoTried.current.has(it.id)) {
-        autoTried.current.add(it.id)
-        void cleanItem(it.id)
-      }
-    }
-  }, [items, autoCleanOn, cleanItem])
+  useAutoClean(items, processor.clean, autoCleanOn)
   const reduce = useReducedMotion()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [rejections, setRejections] = useState<Rejection[]>([])

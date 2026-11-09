@@ -60,6 +60,9 @@ export function Footer() {
             <li>
               <a href="#/app" className={linkCls}>Open the app</a>
             </li>
+            <li>
+              <a href="#/labs" className={linkCls}>Labs (experimental)</a>
+            </li>
             <li><SectionAnchor id="features">Features</SectionAnchor></li>
             <li><SectionAnchor id="how-it-works">How it works</SectionAnchor></li>
             <li><SectionAnchor id="faq">FAQ</SectionAnchor></li>

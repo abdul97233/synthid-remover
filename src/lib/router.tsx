@@ -4,12 +4,14 @@ import type { ReactNode, MouseEvent } from 'react'
 /**
  * Minimal hash-based router (zero dependencies). Hash routing keeps the app
  * working on GitHub Pages / any static host without rewrite rules.
- * Routes: "/" (landing) and "/app" (workspace).
+ * Routes: "/" (landing), "/app" (workspace) and "/labs" (experimental tools).
  */
 
-function normalize(hash: string): string {
+export function normalize(hash: string): string {
   const h = hash.replace(/^#/, '')
-  return h.startsWith('/app') ? '/app' : '/'
+  if (h.startsWith('/app')) return '/app'
+  if (h.startsWith('/labs')) return '/labs'
+  return '/'
 }
 
 export function useHashRoute(): string {

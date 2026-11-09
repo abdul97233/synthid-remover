@@ -1,4 +1,4 @@
-import { navigate, scrollToSection } from '../../lib/router'
+import { navigate, scrollToSection, normalize } from '../../lib/router'
 
 /** Landing-page sections linked from the header, footer and mobile menu. */
 export const NAV_SECTIONS = [
@@ -12,7 +12,7 @@ export const NAV_SECTIONS = [
 export type SectionId = (typeof NAV_SECTIONS)[number]['id']
 
 function onHomeRoute(): boolean {
-  return !window.location.hash.replace(/^#/, '').startsWith('/app')
+  return normalize(window.location.hash) === '/'
 }
 
 /**

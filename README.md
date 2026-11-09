@@ -46,7 +46,7 @@ Google's official detector or [Content Credentials Verify](https://contentcreden
 
 - **Simple mode (default)** — drop files, metadata is removed automatically, then download one file or everything as a single ZIP. Shows what was removed (AI tags, Content Credentials, location, device info). One-tap **Share** on phones.
 - **Advanced mode** — the full inspection workspace below, plus optional auto-clean, output naming (`photo-cleaned.jpg` or `photo.jpg`) and a JSON report export. Your mode choice is remembered.
-- **Experimental: add metadata (opt-in, Advanced mode)** — write your own EXIF tags (make, model, lens, software, author, copyright, description, date taken) into cleaned JPEG/PNG copies losslessly, with device presets (Ray-Ban Meta glasses, iPhone, Pixel, Galaxy, Canon, Sony, Fujifilm, DJI, GoPro). These are user-chosen labels, not provenance: no C2PA is added and pixels/watermarks are untouched.
+- **Labs (experimental) — direct access at `#/labs`** (also in the header, the phone bar and the footer): drop a JPEG/PNG, it is cleaned automatically, then add tags. The same tool can be switched on inside Advanced mode. **Add metadata** — write your own EXIF tags (make, model, lens, software, author, copyright, description, date taken) into cleaned JPEG/PNG copies losslessly, with device presets (Ray-Ban Meta glasses, iPhone, Pixel, Galaxy, Canon, Sony, Fujifilm, DJI, GoPro). These are user-chosen labels, not provenance: no C2PA is added and pixels/watermarks are untouched.
 - **Works offline / installable** — a service worker caches the site itself (never your files).
 - **SynthID analysis** — chunked, case-insensitive byte scan for documented markers
   (C2PA/JUMBF, Content Credentials, IPTC digital source types, generator tags) plus

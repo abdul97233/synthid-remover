@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Sun, Moon, Menu, X, ArrowRight, Lock } from 'lucide-react'
+import { Sun, Moon, Menu, X, ArrowRight, Lock, FlaskConical } from 'lucide-react'
 import { GithubIcon } from '../ui/GithubIcon'
 import { GITHUB_URL } from '../../lib/constants'
 import { useHashRoute } from '../../lib/router'
@@ -173,6 +173,27 @@ export function Header() {
                 </li>
               )
             })}
+            <li className="relative">
+              {route === '/labs' && (
+                <motion.span
+                  layoutId="nav-active"
+                  aria-hidden
+                  className="absolute inset-0 rounded-full border border-line bg-elevated shadow-sm"
+                  transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 34 }}
+                />
+              )}
+              <a
+                href="#/labs"
+                aria-current={route === '/labs' ? 'page' : undefined}
+                className={cn(
+                  'relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors',
+                  route === '/labs' ? 'text-foreground' : 'text-muted hover:text-foreground',
+                )}
+              >
+                <FlaskConical className="size-3.5 text-accent" aria-hidden="true" />
+                Labs
+              </a>
+            </li>
           </ul>
         </nav>
 
@@ -267,6 +288,22 @@ export function Header() {
                     </a>
                   </motion.li>
                 ))}
+                <motion.li variants={{ hidden: { opacity: 0, x: reduce ? 0 : -8 }, show: { opacity: 1, x: 0 } }}>
+                  <a
+                    href="#/labs"
+                    onClick={() => setMenuOpen(false)}
+                    className={cn(
+                      'flex items-center justify-between rounded-xl px-3 py-3 text-[15px] font-medium transition-colors hover:bg-elevated',
+                      route === '/labs' ? 'bg-elevated text-foreground' : 'text-muted hover:text-foreground',
+                    )}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <FlaskConical className="size-4 text-accent" aria-hidden="true" /> Labs
+                      <span className="rounded bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent">Experimental</span>
+                    </span>
+                    <ArrowRight className="size-4 text-subtle" />
+                  </a>
+                </motion.li>
                 <motion.li variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className="mt-3 grid gap-2 border-t border-line pt-4 sm:grid-cols-2">
                   <a
                     href="#/app"

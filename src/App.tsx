@@ -8,6 +8,7 @@ import { useHashRoute } from './lib/router'
 import { EASE } from './components/ui/Motion'
 import { HomePage } from './pages/HomePage'
 import { WorkspacePage } from './pages/WorkspacePage'
+import { LabsPage } from './pages/LabsPage'
 
 let HOME_TITLE = ''
 
@@ -18,7 +19,8 @@ export default function App() {
   // Per-route document title (the home title lives in index.html for crawlers).
   useEffect(() => {
     if (!HOME_TITLE) HOME_TITLE = document.title
-    document.title = route === '/app' ? 'Workspace — SynthID Remover' : HOME_TITLE
+    document.title =
+      route === '/app' ? 'Workspace — SynthID Remover' : route === '/labs' ? 'Labs (experimental) — SynthID Remover' : HOME_TITLE
   }, [route])
 
   // Skip link must not touch the hash (the hash is the router).
@@ -51,7 +53,7 @@ export default function App() {
             exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, y: -6, transition: { duration: 0.16, ease: EASE } }}
             transition={{ duration: reduce ? 0 : 0.4, ease: EASE }}
           >
-            {route === '/app' ? <WorkspacePage /> : <HomePage />}
+            {route === '/app' ? <WorkspacePage /> : route === '/labs' ? <LabsPage /> : <HomePage />}
           </motion.div>
         </AnimatePresence>
       </main>
