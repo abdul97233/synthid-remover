@@ -2,6 +2,8 @@ import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { createHash } from 'node:crypto'
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
 
 /**
  * SEO + hosting plugin.
@@ -46,6 +48,33 @@ function seo(siteUrl: string): Plugin {
         .replace(/sha256-__THEME_HASH__([\s\S]*?)<script>([\s\S]*?)<\/script>/, (_m, mid: string, code: string) =>
           `sha256-${createHash('sha256').update(code).digest('base64')}${mid}<script>${code}</script>`)
       },
+    },
+    // Offline support: after the build is on disk, list every file the app
+    // needs and bake that list (and a content hash as version) into sw.js.
+    writeBundle(options) {
+      if (!isBuild || !options.dir) return
+      const outDir = options.dir
+      const SKIP = new Set(['sw.js', 'robots.txt', 'sitemap.xml', '.nojekyll', 'og-image.png'])
+      const files: string[] = []
+      const walk = (dir: string, rel = '') => {
+        for (const name of readdirSync(dir)) {
+          const full = join(dir, name)
+          const r = rel ? `${rel}/${name}` : name
+          if (statSync(full).isDirectory()) walk(full, r)
+          else if (!SKIP.has(r) && !r.endsWith('.map')) files.push(r)
+        }
+      }
+      walk(outDir)
+      files.sort()
+      const hash = createHash('sha256')
+      for (const f of files) hash.update(f).update(readFileSync(join(outDir, f)))
+      const version = hash.digest('hex').slice(0, 12)
+      const precache = ['./', ...files.map((f) => `./${f}`)]
+      const template = readFileSync(resolve(__dirname, 'scripts/sw.template.js'), 'utf8')
+      writeFileSync(
+        join(outDir, 'sw.js'),
+        template.replace('__VERSION__', version).replace('__PRECACHE__', JSON.stringify(precache, null, 2)),
+      )
     },
     generateBundle() {
       const robots = ['User-agent: *', 'Allow: /', base ? `Sitemap: ${base}sitemap.xml` : ''].filter(Boolean).join('\n')
