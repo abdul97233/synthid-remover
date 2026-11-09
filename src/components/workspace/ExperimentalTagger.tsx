@@ -1,17 +1,19 @@
-import { useId, useState } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
-import { FlaskConical, Download, Info, RotateCcw, Glasses, Smartphone, Camera, Plane } from 'lucide-react'
+import { useId, useMemo, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { FlaskConical, Download, Info, RotateCcw, Glasses, Smartphone, Camera, Plane, Wand2, Share2, CheckCircle2, Crop } from 'lucide-react'
 import type { FileItem } from '../../types'
-import { TAG_PRESETS, applyTags, hasAnyTag, toExifDate, type TagFields } from '../../lib/exifWriter'
-import { outputName } from '../../lib/output'
+import { TAG_PRESETS, applyTags, buildExif, hasAnyTag, insertExifJpeg, toExifDate, type TagFields } from '../../lib/exifWriter'
+import { renderFrame } from '../../lib/reencode'
+import { outputName, canShareFiles } from '../../lib/output'
 import { downloadBlob } from '../../lib/download'
 import { createZip } from '../../lib/zip'
-import { cn } from '../../lib/format'
+import { cn, formatBytes } from '../../lib/format'
 import { Button } from '../ui/Button'
 import { Spinner } from '../ui/Spinner'
 import { EASE } from '../ui/Motion'
 
 const PRESET_ICON: Record<string, typeof Camera> = {
+  'rayban-meta-2': Glasses,
   'rayban-meta': Glasses,
   'iphone-15-pro': Smartphone,
   'iphone-16': Smartphone,
@@ -20,7 +22,17 @@ const PRESET_ICON: Record<string, typeof Camera> = {
   'dji-mini-4': Plane,
 }
 
-type FormState = Required<Omit<TagFields, 'dateTimeOriginal'>> & { date: string }
+type FormState = {
+  make: string
+  model: string
+  lensMake: string
+  lensModel: string
+  software: string
+  artist: string
+  copyright: string
+  description: string
+  date: string
+}
 
 const EMPTY: FormState = {
   make: '',
@@ -32,6 +44,11 @@ const EMPTY: FormState = {
   copyright: '',
   description: '',
   date: '',
+}
+
+interface Output {
+  name: string
+  blob: Blob
 }
 
 function nowLocal(): string {
@@ -75,29 +92,47 @@ function Field({
 }
 
 /**
- * EXPERIMENTAL, opt-in: write chosen EXIF tags into cleaned JPEG/PNG copies.
- * The tags are claims chosen by the user; they are not provenance.
+ * EXPERIMENTAL, opt-in: write chosen EXIF tags into cleaned images. Device
+ * presets can also re-frame the photo to that device's output format.
+ * The tags are labels chosen by the user; they are not provenance.
  */
 export function ExperimentalTagger({ items }: { items: FileItem[] }) {
   const reduce = useReducedMotion()
+  const shareable = useMemo(canShareFiles, [])
   const [form, setForm] = useState<FormState>(EMPTY)
-  const [preset, setPreset] = useState<string | null>(null)
+  const [presetId, setPresetId] = useState<string | null>(null)
+  const [frameOn, setFrameOn] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState<string | null>(null)
+  const [outputs, setOutputs] = useState<Output[] | null>(null)
+  const [shared, setShared] = useState(false)
 
-  const targets = items.filter((i) => i.clean && (i.clean.format === 'jpeg' || i.clean.format === 'png'))
+  const preset = TAG_PRESETS.find((p) => p.id === presetId) ?? null
+  const frame = preset?.frame && frameOn ? preset.frame : null
+
+  // Re-framing decodes the original, so any cleaned image works; the lossless
+  // path can only insert EXIF into JPEG / PNG containers.
+  const targets = items.filter(
+    (i) => i.clean && (frame ? i.info?.kind === 'image' || /^(jpeg|png|webp)$/.test(i.clean.format) : /^(jpeg|png)$/.test(i.clean.format)),
+  )
   const skipped = items.filter((i) => i.clean && !targets.includes(i)).length
+
+  const invalidate = () => {
+    setOutputs(null)
+    setShared(false)
+    setError(null)
+  }
   const set = (k: keyof FormState) => (v: string) => {
     setForm((f) => ({ ...f, [k]: v }))
-    setDone(null)
+    invalidate()
   }
 
   const choosePreset = (id: string) => {
     const p = TAG_PRESETS.find((x) => x.id === id)
     if (!p) return
-    setPreset(id)
-    setDone(null)
+    setPresetId(id)
+    setFrameOn(!!p.frame)
+    invalidate()
     setForm((f) => ({ ...f, make: '', model: '', lensMake: '', lensModel: '', software: '', ...p.fields }))
   }
 
@@ -114,23 +149,54 @@ export function ExperimentalTagger({ items }: { items: FileItem[] }) {
   }
   const ready = hasAnyTag(fields) && targets.length > 0
 
-  const run = async () => {
-    setError(null)
-    setDone(null)
+  const create = async () => {
+    invalidate()
     setBusy(true)
     try {
-      const tagged = await Promise.all(
-        targets.map(async (i) => ({ name: outputName(i.clean!.filename), blob: await applyTags(i.clean!.blob, i.clean!.format, fields) })),
-      )
-      if (tagged.length === 1) downloadBlob(tagged[0].blob, tagged[0].name)
-      else downloadBlob(await createZip(tagged), `tagged-files-${new Date().toISOString().slice(0, 10)}.zip`)
-      setDone(`Tagged ${tagged.length} file${tagged.length === 1 ? '' : 's'}.`)
+      const out: Output[] = []
+      // One at a time: full-size canvases are memory-heavy on phones.
+      for (const i of targets) {
+        if (frame) {
+          const jpeg = await renderFrame(i.file, frame.width, frame.height, frame.quality)
+          const tiff = buildExif({ ...fields, orientation: 1, colorSpace: 1, pixelWidth: frame.width, pixelHeight: frame.height })
+          const bytes = insertExifJpeg(new Uint8Array(await jpeg.arrayBuffer()), tiff)
+          const name = outputName(i.clean!.filename).replace(/\.[^.]+$/, '') + '.jpg'
+          out.push({ name, blob: new Blob([bytes.buffer as ArrayBuffer], { type: 'image/jpeg' }) })
+        } else {
+          out.push({ name: outputName(i.clean!.filename), blob: await applyTags(i.clean!.blob, i.clean!.format, fields) })
+        }
+      }
+      setOutputs(out)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Tagging failed.')
     } finally {
       setBusy(false)
     }
   }
+
+  const download = async () => {
+    if (!outputs?.length) return
+    if (outputs.length === 1) downloadBlob(outputs[0].blob, outputs[0].name)
+    else downloadBlob(await createZip(outputs), `tagged-files-${new Date().toISOString().slice(0, 10)}.zip`)
+  }
+
+  // Must run directly from a tap (no awaits before navigator.share) — iOS requires it.
+  const share = () => {
+    if (!outputs?.length) return
+    const files = outputs.map((o) => new File([o.blob], o.name, { type: o.blob.type || 'image/jpeg' }))
+    if (!navigator.canShare?.({ files })) {
+      setError('This browser cannot share these files — use Download instead.')
+      return
+    }
+    navigator
+      .share({ files })
+      .then(() => setShared(true))
+      .catch((e: unknown) => {
+        if (!(e instanceof DOMException && e.name === 'AbortError')) setError('Sharing failed — use Download instead.')
+      })
+  }
+
+  const totalSize = outputs?.reduce((s, o) => s + o.blob.size, 0) ?? 0
 
   return (
     <motion.section
@@ -155,8 +221,8 @@ export function ExperimentalTagger({ items }: { items: FileItem[] }) {
         <Info className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
         <span>
           Writes your chosen tags (camera, author, copyright, date) into the <strong className="font-medium text-foreground">cleaned</strong>{' '}
-          JPEG and PNG copies, losslessly. These are labels you choose, not proof of origin: they don't add Content
-          Credentials (C2PA) and don't change pixels or invisible watermarks.
+          copies. These are labels you choose, not proof of origin: they don't add Content Credentials (C2PA) and don't change
+          invisible watermarks. Whether an app such as Instagram reacts to them is up to that app.
         </span>
       </p>
 
@@ -165,7 +231,7 @@ export function ExperimentalTagger({ items }: { items: FileItem[] }) {
       <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible">
         {TAG_PRESETS.map((p) => {
           const Icon = PRESET_ICON[p.id] ?? Camera
-          const on = preset === p.id
+          const on = presetId === p.id
           return (
             <button
               key={p.id}
@@ -184,10 +250,52 @@ export function ExperimentalTagger({ items }: { items: FileItem[] }) {
         })}
       </div>
 
+      {/* Device format (only for presets that define one) */}
+      <AnimatePresence initial={false}>
+        {preset?.frame && (
+          <motion.div
+            initial={reduce ? false : { opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: EASE }}
+            className="overflow-hidden"
+          >
+            <button
+              type="button"
+              role="switch"
+              aria-checked={frameOn}
+              onClick={() => {
+                setFrameOn((v) => !v)
+                invalidate()
+              }}
+              className="mt-3 flex w-full items-start gap-3 rounded-xl border border-line bg-elevated/50 p-3 text-left"
+            >
+              <span
+                className={cn(
+                  'relative mt-0.5 inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors',
+                  frameOn ? 'border-primary bg-primary' : 'border-line-strong bg-elevated',
+                )}
+              >
+                <span className={cn('inline-block size-3.5 rounded-full bg-white shadow transition-transform', frameOn ? 'translate-x-[18px]' : 'translate-x-[2px]')} />
+              </span>
+              <span className="min-w-0">
+                <span className="flex items-center gap-1.5 text-sm font-medium">
+                  <Crop className="size-3.5 text-subtle" aria-hidden="true" /> Match {preset.label} photo format
+                </span>
+                <span className="mt-0.5 block text-xs text-muted">
+                  {preset.frame.width} × {preset.frame.height} px · 3:4 portrait, centre crop · JPEG {Math.round(preset.frame.quality * 100)}%.
+                  Re-encodes the pixels (like a new photo), so it isn't lossless.
+                </span>
+              </span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Fields */}
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Field label="Make" value={form.make} onChange={set('make')} placeholder="e.g. Meta" />
-        <Field label="Model" value={form.model} onChange={set('model')} placeholder="e.g. Ray-Ban Meta Smart Glasses" />
+        <Field label="Make" value={form.make} onChange={set('make')} placeholder="e.g. Meta AI" />
+        <Field label="Model" value={form.model} onChange={set('model')} placeholder="e.g. Ray-Ban Meta Smart Glasses 2" />
         <Field label="Lens" value={form.lensModel} onChange={set('lensModel')} placeholder="optional" />
         <Field label="Software" value={form.software} onChange={set('software')} placeholder="optional" />
         <Field label="Artist / author" value={form.artist} onChange={set('artist')} placeholder="Your name" />
@@ -204,10 +312,9 @@ export function ExperimentalTagger({ items }: { items: FileItem[] }) {
       <div className="mt-4 flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-muted" aria-live="polite">
           {targets.length === 0
-            ? 'Clean at least one JPEG or PNG first — tags are added to the cleaned copy.'
-            : `Applies to ${targets.length} cleaned JPEG/PNG file${targets.length === 1 ? '' : 's'}${skipped ? ` (${skipped} other format${skipped === 1 ? '' : 's'} skipped)` : ''}.`}
+            ? 'Add an image first — it is cleaned automatically, then tagged.'
+            : `Applies to ${targets.length} cleaned image${targets.length === 1 ? '' : 's'}${skipped ? ` (${skipped} other file${skipped === 1 ? '' : 's'} skipped)` : ''}.`}
           {error && <span className="mt-1 block text-danger">{error}</span>}
-          {done && <span className="mt-1 block text-ok">{done}</span>}
         </p>
         <div className="flex gap-2">
           <Button
@@ -215,19 +322,54 @@ export function ExperimentalTagger({ items }: { items: FileItem[] }) {
             size="sm"
             onClick={() => {
               setForm(EMPTY)
-              setPreset(null)
-              setDone(null)
-              setError(null)
+              setPresetId(null)
+              setFrameOn(false)
+              invalidate()
             }}
           >
             <RotateCcw className="size-3.5" /> Reset
           </Button>
-          <Button size="sm" onClick={() => void run()} disabled={!ready || busy}>
-            {busy ? <Spinner className="size-3.5 text-white" /> : <Download className="size-3.5" />}
-            {targets.length > 1 ? `Download tagged (${targets.length}) · ZIP` : 'Download tagged copy'}
+          <Button size="sm" onClick={() => void create()} disabled={!ready || busy} className="flex-1 sm:flex-none">
+            {busy ? <Spinner className="size-3.5 text-white" /> : <Wand2 className="size-3.5" />}
+            {busy ? 'Creating…' : `Create tagged ${targets.length > 1 ? `copies (${targets.length})` : 'copy'}`}
           </Button>
         </div>
       </div>
+
+      {/* Result */}
+      <AnimatePresence>
+        {outputs && (
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: EASE }}
+            className="mt-4 rounded-xl border border-ok/30 bg-ok/5 p-3 sm:p-4"
+          >
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-ok">
+              <CheckCircle2 className="size-4" aria-hidden="true" />
+              {outputs.length} tagged {outputs.length === 1 ? 'copy' : 'copies'} ready · {formatBytes(totalSize)}
+              {frame ? ` · ${frame.width}×${frame.height}` : ''}
+            </p>
+            <p className="mt-1 text-xs text-muted">
+              {shareable
+                ? 'On a phone, use Save / Share and pick “Save Image” so it lands in your Photos.'
+                : 'Download the file to keep it.'}
+              {shared ? ' Shared ✓' : ''}
+            </p>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              {shareable && (
+                <Button onClick={share} className="sm:flex-none">
+                  <Share2 className="size-4" /> Save / Share
+                </Button>
+              )}
+              <Button variant={shareable ? 'outline' : 'primary'} onClick={() => void download()}>
+                <Download className="size-4" /> {outputs.length > 1 ? 'Download ZIP' : 'Download'}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.section>
   )
 }

@@ -19,17 +19,43 @@ export interface TagFields {
   description?: string
   /** "YYYY:MM:DD HH:MM:SS" */
   dateTimeOriginal?: string
+  /** Numeric tags written when the image is re-framed to a device format. */
+  orientation?: number
+  colorSpace?: number
+  pixelWidth?: number
+  pixelHeight?: number
+}
+
+/** Output format a real device produces (used by the "match device format" option). */
+export interface DeviceFrame {
+  width: number
+  height: number
+  /** JPEG quality 0–1 */
+  quality: number
 }
 
 export interface TagPreset {
   id: string
   label: string
   fields: Pick<TagFields, 'make' | 'model' | 'lensMake' | 'lensModel' | 'software'>
+  /** When set, the preset can also re-frame the photo to this device's output format. */
+  frame?: DeviceFrame
 }
 
 /** Device presets (typical published EXIF values; firmware versions vary). */
 export const TAG_PRESETS: TagPreset[] = [
-  { id: 'rayban-meta', label: 'Ray-Ban Meta glasses', fields: { make: 'Meta', model: 'Ray-Ban Meta Smart Glasses', software: '' } },
+  {
+    id: 'rayban-meta-2',
+    label: 'Ray-Ban Meta 2',
+    fields: { make: 'Meta AI', model: 'Ray-Ban Meta Smart Glasses 2', software: '' },
+    frame: { width: 3024, height: 4032, quality: 0.95 },
+  },
+  {
+    id: 'rayban-meta',
+    label: 'Ray-Ban Meta (Gen 1)',
+    fields: { make: 'Meta AI', model: 'Ray-Ban Meta Smart Glasses', software: '' },
+    frame: { width: 3024, height: 4032, quality: 0.95 },
+  },
   { id: 'iphone-15-pro', label: 'iPhone 15 Pro', fields: { make: 'Apple', model: 'iPhone 15 Pro', lensMake: 'Apple', lensModel: 'iPhone 15 Pro back triple camera 6.765mm f/1.78', software: '17.5.1' } },
   { id: 'iphone-16', label: 'iPhone 16', fields: { make: 'Apple', model: 'iPhone 16', lensMake: 'Apple', lensModel: 'iPhone 16 back dual wide camera 5.96mm f/1.6', software: '18.1' } },
   { id: 'pixel-9-pro', label: 'Google Pixel 9 Pro', fields: { make: 'Google', model: 'Pixel 9 Pro', software: '' } },
@@ -42,6 +68,7 @@ export const TAG_PRESETS: TagPreset[] = [
 ]
 
 const ASCII = 2
+const SHORT = 3
 const LONG = 4
 
 type Entry = { tag: number; type: number; value: Uint8Array | number }
@@ -76,6 +103,13 @@ export function buildExif(f: TagFields): Uint8Array {
   add(exif, 0x9004, f.dateTimeOriginal)
   add(exif, 0xa433, f.lensMake)
   add(exif, 0xa434, f.lensModel)
+  const num = (list: Entry[], tag: number, type: number, v?: number) => {
+    if (typeof v === 'number' && Number.isFinite(v) && v >= 0) list.push({ tag, type, value: Math.round(v) })
+  }
+  num(ifd0, 0x0112, SHORT, f.orientation)
+  num(exif, 0xa001, SHORT, f.colorSpace)
+  num(exif, 0xa002, LONG, f.pixelWidth)
+  num(exif, 0xa003, LONG, f.pixelHeight)
   if (exif.length) ifd0.push({ tag: 0x8769, type: LONG, value: 0 }) // patched below
   ifd0.sort((a, b) => a.tag - b.tag)
   exif.sort((a, b) => a.tag - b.tag)
@@ -112,7 +146,8 @@ export function buildExif(f: TagFields): Uint8Array {
         }
       } else {
         dv.setUint32(p + 4, 1, true)
-        dv.setUint32(p + 8, e.tag === 0x8769 ? exifOff : e.value, true)
+        if (e.type === SHORT) dv.setUint16(p + 8, e.value, true)
+        else dv.setUint32(p + 8, e.tag === 0x8769 ? exifOff : e.value, true)
       }
       p += 12
     }
