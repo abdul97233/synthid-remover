@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+
 import type { ComponentType } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { House, LayoutGrid, ShieldAlert, CircleHelp, ScanLine, Plus } from 'lucide-react'
@@ -34,25 +34,6 @@ const RIGHT: Tab[] = [
   { key: 'faq', label: 'FAQ', Icon: CircleHelp, sections: ['faq'], go: () => goToSection('faq') },
 ]
 
-/** Hides the bar while scrolling down, brings it back on any upward scroll. */
-function useAutoHide() {
-  const [hidden, setHidden] = useState(false)
-  const last = useRef(0)
-  useEffect(() => {
-    last.current = window.scrollY
-    const onScroll = () => {
-      const y = window.scrollY
-      const dy = y - last.current
-      if (Math.abs(dy) < 6) return
-      setHidden(dy > 0 && y > 160)
-      last.current = y
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-  return hidden
-}
-
 /**
  * App-style bottom navigation for phones (< md). Four tabs around a raised
  * centre action: "Scan" opens the workspace, and inside the workspace it
@@ -62,7 +43,6 @@ export function MobileTabBar() {
   const route = useHashRoute()
   const reduce = useReducedMotion()
   const { active } = useScrollState(route)
-  const hidden = useAutoHide()
   const inApp = route === '/app'
 
   const activeKey = inApp
@@ -106,14 +86,10 @@ export function MobileTabBar() {
   }
 
   return (
-    <motion.nav
+    // Always pinned to the bottom of the screen (never hides on scroll).
+    <nav
       aria-label="Bottom navigation"
       className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden"
-      initial={false}
-      // Slide fully out of view, including the raised centre button that overhangs the bar.
-      animate={{ y: hidden ? 'calc(100% + 48px)' : '0%', opacity: hidden ? 0 : 1 }}
-      style={{ pointerEvents: hidden ? 'none' : undefined }}
-      transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 36 }}
     >
       <div className="relative mx-auto max-w-md">
         {/* Bar surface */}
@@ -166,6 +142,6 @@ export function MobileTabBar() {
           {RIGHT.map(renderTab)}
         </ul>
       </div>
-    </motion.nav>
+    </nav>
   )
 }
