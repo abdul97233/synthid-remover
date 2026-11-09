@@ -30,7 +30,7 @@ function ToolLink({ href, children }: { href: string; children: ReactNode }) {
       href={href}
       target="_blank"
       rel="noreferrer noopener"
-      className="group inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-line bg-card px-4 text-sm font-medium transition-colors hover:border-primary/50 hover:text-primary"
+      className="group inline-flex h-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-line bg-card px-4 text-sm font-medium transition-colors hover:border-primary/50 hover:text-primary"
     >
       {children}
       <ExternalLink className="size-3.5 transition-transform group-hover:-translate-y-px group-hover:translate-x-px" aria-hidden />
@@ -125,7 +125,7 @@ export function HonestySection() {
                 choose whether to learn more there.
               </p>
             </div>
-            <div className="flex flex-col gap-2.5 sm:flex-row md:flex-col lg:flex-row">
+            <div className="flex shrink-0 flex-col gap-2.5 sm:flex-row md:flex-col xl:flex-row">
               <ToolLink href={SYNTHID_DETECTOR_URL}>Google SynthID Detector</ToolLink>
               <ToolLink href={C2PA_VERIFY_URL}>Content Credentials Verify</ToolLink>
             </div>

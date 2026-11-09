@@ -22,12 +22,12 @@ explicit about what is technically possible:
 | Report detection status honestly (`indicators found` / `no indicators found` / `cannot be determined — why`) | ✅ Always |
 | Show a confidence score | ✅ Only when a method provides one — metadata inspection does not, so none is invented |
 | Remove/strip metadata (EXIF, XMP, IPTC, ID3, container boxes) losslessly | ✅ Works locally |
-| **Detect pixel-level / audio-level SynthID** | ❌ Impossible locally — invisible watermarks never appear in metadata; only [Google's official SynthID Detector](https://synthid.google/) can verify them |
+| **Detect pixel-level / audio-level SynthID** | ❌ Impossible locally — invisible watermarks never appear in metadata; only [Google's official SynthID Detector](https://deepmind.google/models/synthid/#synthid-detector) can verify them |
 | **Remove SynthID watermarks** | ❌ **No verified method exists.** This app will never claim a watermark was removed because metadata was cleaned |
 
 The app is *named* SynthID Remover, but every screen reinforces the boundary:
 metadata cleaning ≠ watermark removal. For an authoritative watermark verdict, use
-Google's official detector or [Content Credentials Verify](https://contentcredentials.org/verify)
+Google's official detector or [Content Credentials Verify](https://verify.contentauthenticity.org/)
 — these open in a new tab; this app never sends your file anywhere.
 
 ---

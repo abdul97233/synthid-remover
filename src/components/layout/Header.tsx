@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { Sun, Moon, Menu, X, ArrowRight, Lock, FlaskConical } from 'lucide-react'
+import { Sun, Moon, Menu, X, ArrowRight, Lock, FlaskConical, House } from 'lucide-react'
 import { GithubIcon } from '../ui/GithubIcon'
 import { GITHUB_URL } from '../../lib/constants'
 import { useHashRoute } from '../../lib/router'
@@ -130,6 +130,8 @@ export function Header() {
   }
 
   const elevated = scrolled || menuOpen
+  // Home is highlighted on the landing page until a section scrolls into view.
+  const homeActive = route === '/' && !active
 
   return (
     <header
@@ -147,6 +149,28 @@ export function Header() {
 
         <nav aria-label="Primary" className="hidden lg:block">
           <ul className="flex items-center gap-0.5 rounded-full border border-line/70 bg-card/50 p-1">
+            <li className="relative">
+              {homeActive && (
+                <motion.span
+                  layoutId="nav-active"
+                  aria-hidden
+                  className="absolute inset-0 rounded-full border border-line bg-elevated shadow-sm"
+                  transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 34 }}
+                />
+              )}
+              <a
+                href="#/"
+                onClick={goHome}
+                aria-current={homeActive ? 'page' : undefined}
+                className={cn(
+                  'relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors',
+                  homeActive ? 'text-foreground' : 'text-muted hover:text-foreground',
+                )}
+              >
+                <House className="size-3.5" aria-hidden="true" />
+                Home
+              </a>
+            </li>
             {NAV_SECTIONS.map((item) => {
               const isActive = active === item.id
               return (
@@ -270,6 +294,21 @@ export function Header() {
                 animate="show"
                 variants={{ hidden: {}, show: { transition: { staggerChildren: reduce ? 0 : 0.04 } } }}
               >
+                <motion.li variants={{ hidden: { opacity: 0, x: reduce ? 0 : -8 }, show: { opacity: 1, x: 0 } }}>
+                  <a
+                    href="#/"
+                    onClick={goHome}
+                    className={cn(
+                      'flex items-center justify-between rounded-xl px-3 py-3 text-[15px] font-medium transition-colors hover:bg-elevated',
+                      homeActive ? 'bg-elevated text-foreground' : 'text-muted hover:text-foreground',
+                    )}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <House className="size-4" aria-hidden="true" /> Home
+                    </span>
+                    <ArrowRight className="size-4 text-subtle" />
+                  </a>
+                </motion.li>
                 {NAV_SECTIONS.map((item) => (
                   <motion.li
                     key={item.id}

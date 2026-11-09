@@ -9,8 +9,8 @@ export const GITHUB_URL: string =
  * Official third-party verification tools. These are plain outbound links that
  * open in a new tab. This application never sends any user file anywhere.
  */
-export const SYNTHID_DETECTOR_URL = 'https://synthid.google/'
-export const C2PA_VERIFY_URL = 'https://contentcredentials.org/verify'
+export const SYNTHID_DETECTOR_URL = 'https://deepmind.google/models/synthid/#synthid-detector'
+export const C2PA_VERIFY_URL = 'https://verify.contentauthenticity.org/'
 
 export const MAX_FILE_SIZE = 500 * 1024 * 1024 // 500 MB per file, browser-memory bound
 
