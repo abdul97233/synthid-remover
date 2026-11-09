@@ -26,7 +26,7 @@ export function CtaBand() {
               </p>
               <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
                 <Button size="lg" onClick={() => navigate('/app')} className="group">
-                  Start analyzing <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  Clean my files <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                 </Button>
                 <a
                   href={GITHUB_URL}

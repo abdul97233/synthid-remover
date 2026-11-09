@@ -4,6 +4,7 @@ import { Download, Scale, Eraser, Columns2, ImageOff, ArrowRight } from 'lucide-
 import type { FileItem, MediaKind } from '../../types'
 import { useObjectUrl } from '../../hooks/useObjectUrl'
 import { downloadBlob } from '../../lib/download'
+import { outputName } from '../../lib/output'
 import { formatBytes, cn } from '../../lib/format'
 import { Button } from '../ui/Button'
 import { Badge } from '../ui/Badge'
@@ -145,7 +146,7 @@ export function ComparePanel({ item, onClean }: { item: FileItem; onClean: () =>
               </p>
             </div>
           </div>
-          <Button onClick={() => downloadBlob(clean.blob, clean.filename)} disabled={item.status === 'cleaning'} className="w-full sm:w-auto">
+          <Button onClick={() => downloadBlob(clean.blob, outputName(clean.filename))} disabled={item.status === 'cleaning'} className="w-full sm:w-auto">
             <Download className="size-4" aria-hidden="true" /> Download cleaned copy
           </Button>
         </div>

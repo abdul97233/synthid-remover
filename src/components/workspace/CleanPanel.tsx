@@ -5,6 +5,7 @@ import type { FileItem } from '../../types'
 import type { CanvasFormat } from '../../lib/reencode'
 import { isSupportedExtension, extensionOf } from '../../lib/constants'
 import { downloadBlob } from '../../lib/download'
+import { outputName } from '../../lib/output'
 import { formatBytes, cn } from '../../lib/format'
 import { Button } from '../ui/Button'
 import { Badge } from '../ui/Badge'
@@ -173,7 +174,7 @@ export function CleanPanel({
                 {lossy ? 'Re-encoded copy ready (lossy)' : 'Cleaned copy ready (lossless)'}
               </p>
               <p className="mt-0.5 text-sm text-muted [overflow-wrap:anywhere]">
-                <span className="font-mono text-foreground">{clean.filename}</span> · {formatBytes(clean.size)} ·{' '}
+                <span className="font-mono text-foreground">{outputName(clean.filename)}</span> · {formatBytes(clean.size)} ·{' '}
                 {clean.removed.length} metadata item(s) removed
               </p>
               <p className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-muted">
@@ -183,7 +184,7 @@ export function CleanPanel({
             </div>
           </div>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <Button onClick={() => downloadBlob(clean.blob, clean.filename)} disabled={cleaning}>
+            <Button onClick={() => downloadBlob(clean.blob, outputName(clean.filename))} disabled={cleaning}>
               <Download className="size-4" aria-hidden="true" /> Download cleaned copy
             </Button>
             <Button variant="secondary" onClick={onViewCompare}>

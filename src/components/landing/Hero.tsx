@@ -69,7 +69,7 @@ export function Hero() {
             className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center lg:justify-start"
           >
             <Button size="lg" onClick={() => navigate('/app')} className="group">
-              <UploadCloud className="size-4" /> Start analyzing
+              <UploadCloud className="size-4" /> Clean my files
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Button>
             <Button size="lg" variant="glass" onClick={() => scrollToSection('how-it-works')}>

@@ -126,7 +126,7 @@ export function MobileTabBar() {
               type="button"
               onClick={onCenter}
               whileTap={reduce ? undefined : { scale: 0.92 }}
-              aria-label={inApp ? 'Add files' : 'Open the workspace and scan files'}
+              aria-label={inApp ? 'Add files' : 'Open the workspace and clean files'}
               aria-current={inApp ? 'page' : undefined}
               className="group absolute -top-6 flex flex-col items-center gap-1"
             >
@@ -156,7 +156,7 @@ export function MobileTabBar() {
                 </span>
               </span>
               <span className={cn('text-[10.5px] font-semibold tracking-tight', inApp ? 'text-primary' : 'text-foreground')}>
-                {inApp ? 'Add' : 'Scan'}
+                {inApp ? 'Add' : 'Clean'}
               </span>
             </motion.button>
           </li>

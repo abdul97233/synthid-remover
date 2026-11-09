@@ -44,6 +44,9 @@ Google's official detector or [Content Credentials Verify](https://contentcreden
 
 ## Features
 
+- **Simple mode (default)** — drop files, metadata is removed automatically, then download one file or everything as a single ZIP. Shows what was removed (AI tags, Content Credentials, location, device info). One-tap **Share** on phones.
+- **Advanced mode** — the full inspection workspace below, plus optional auto-clean, output naming (`photo-cleaned.jpg` or `photo.jpg`) and a JSON report export. Your mode choice is remembered.
+- **Works offline / installable** — a service worker caches the site itself (never your files).
 - **SynthID analysis** — chunked, case-insensitive byte scan for documented markers
   (C2PA/JUMBF, Content Credentials, IPTC digital source types, generator tags) plus
   decoded EXIF/XMP/IPTC inspection for images. Three-state honest verdicts, evidence

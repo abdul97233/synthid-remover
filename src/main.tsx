@@ -11,3 +11,12 @@ createRoot(root).render(
     <App />
   </StrictMode>,
 )
+
+// Offline support + installable app (production only; caches static site files, never user media).
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {
+      /* offline mode is a bonus; the app works without it */
+    })
+  })
+}

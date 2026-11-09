@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { CloudUpload, Lock, ScanSearch, Eraser, Download, MousePointerClick } from 'lucide-react'
+import { CloudUpload, ScanSearch, Eraser, Download, MousePointerClick, FileJson, Zap, SlidersHorizontal } from 'lucide-react'
 import { useMediaProcessor } from '../hooks/useMediaProcessor'
 import { partitionFiles, type Rejection } from '../lib/fileValidation'
-import { downloadBlob } from '../lib/download'
+import { downloadAllCleaned, downloadReport } from '../lib/output'
+import { usePreferences, setPreference } from '../lib/preferences'
+import { SimpleWorkspace } from '../components/workspace/SimpleWorkspace'
+import { ModeSwitch, PrefSwitch, NamingSelect } from '../components/workspace/ModeControls'
 import type { CanvasFormat } from '../lib/reencode'
 import { Dropzone } from '../components/workspace/Dropzone'
 import { FileList } from '../components/workspace/FileList'
@@ -25,6 +28,24 @@ const STEPS = [
 export function WorkspacePage() {
   const processor = useMediaProcessor()
   const { items } = processor
+  const prefs = usePreferences()
+  const simple = prefs.mode === 'simple'
+  const autoCleanOn = simple || prefs.autoClean
+  const [zipError, setZipError] = useState<string | null>(null)
+
+  // Auto-clean: once a file's analysis succeeds, clean it (each file at most once
+  // automatically, so a failure never loops). The worker runs jobs one at a time.
+  const autoTried = useRef(new Set<string>())
+  const { clean: cleanItem } = processor
+  useEffect(() => {
+    if (!autoCleanOn) return
+    for (const it of items) {
+      if (it.status === 'ready' && it.analysis && !it.clean && it.structure && !it.structure.parseError && !autoTried.current.has(it.id)) {
+        autoTried.current.add(it.id)
+        void cleanItem(it.id)
+      }
+    }
+  }, [items, autoCleanOn, cleanItem])
   const reduce = useReducedMotion()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [rejections, setRejections] = useState<Rejection[]>([])
@@ -99,9 +120,8 @@ export function WorkspacePage() {
   }
 
   const downloadAll = () => {
-    const cleaned = items.filter((i) => i.clean)
-    // Stagger so browsers don't collapse multiple programmatic downloads into one.
-    cleaned.forEach((i, n) => window.setTimeout(() => downloadBlob(i.clean!.blob, i.clean!.filename), n * 400))
+    setZipError(null)
+    downloadAllCleaned(items).catch((e: unknown) => setZipError(e instanceof Error ? e.message : 'Could not build the ZIP.'))
   }
 
   const clearAll = () => {
@@ -121,19 +141,45 @@ export function WorkspacePage() {
 
       <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
         {/* Page heading */}
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
             <h1 className="text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
-              Media <span className="text-gradient">workspace</span>
+              {simple ? (
+                <>Clean your <span className="text-gradient">files</span></>
+              ) : (
+                <>Media <span className="text-gradient">workspace</span></>
+              )}
             </h1>
             <p className="mt-1 text-sm text-muted text-pretty">
-              Analyze AI-generation indicators, inspect metadata, and clean files — all locally.
+              {simple
+                ? 'Drop files and hidden metadata is removed automatically. Then download.'
+                : 'Analyze AI-generation indicators, inspect metadata, and clean files — all locally.'}
             </p>
           </div>
+          <ModeSwitch mode={prefs.mode} onChange={(m) => setPreference('mode', m)} />
         </div>
 
         <AnimatePresence mode="wait" initial={false}>
-          {!hasItems ? (
+          {simple ? (
+            <motion.div
+              key="simple"
+              initial={reduce ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
+              transition={{ duration: 0.35, ease: EASE }}
+            >
+              <SimpleWorkspace
+                items={items}
+                onFiles={handleFiles}
+                dragActive={dragActive}
+                rejections={rejections}
+                onDismissRejections={() => setRejections([])}
+                onRemove={removeItem}
+                onClear={() => setConfirmClear(true)}
+                onAdvanced={() => setPreference('mode', 'advanced')}
+              />
+            </motion.div>
+          ) : !hasItems ? (
             <motion.div
               key="empty"
               initial={reduce ? false : { opacity: 0, y: 12 }}
@@ -182,6 +228,27 @@ export function WorkspacePage() {
                 onDownloadAll={downloadAll}
                 onClear={() => setConfirmClear(true)}
               />
+
+              <div className="flex flex-col gap-3 rounded-2xl border border-line bg-card/60 px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-subtle">
+                  <SlidersHorizontal className="size-3.5" aria-hidden="true" /> Options
+                </span>
+                <PrefSwitch
+                  icon={Zap}
+                  label="Auto-clean after analysis"
+                  checked={prefs.autoClean}
+                  onChange={(v) => setPreference('autoClean', v)}
+                />
+                <NamingSelect value={prefs.naming} onChange={(v) => setPreference('naming', v)} />
+                <button
+                  type="button"
+                  onClick={() => downloadReport(items)}
+                  className="inline-flex items-center gap-1.5 self-start rounded-lg px-2 py-1 text-sm font-medium text-muted transition-colors hover:bg-elevated hover:text-foreground sm:ml-auto sm:self-auto"
+                >
+                  <FileJson className="size-4" aria-hidden="true" /> Export report (JSON)
+                </button>
+              </div>
+              {zipError && <p className="text-sm text-danger">{zipError}</p>}
 
               <RejectionNotice rejections={rejections} onDismiss={() => setRejections([])} />
 

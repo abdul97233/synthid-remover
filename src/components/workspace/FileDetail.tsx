@@ -19,6 +19,7 @@ import type { FileItem } from '../../types'
 import type { CanvasFormat } from '../../lib/reencode'
 import { FORMAT_LABEL, extensionOf } from '../../lib/constants'
 import { downloadBlob } from '../../lib/download'
+import { outputName } from '../../lib/output'
 import { formatBytes, cn } from '../../lib/format'
 import { useObjectUrl } from '../../hooks/useObjectUrl'
 import { Tabs, type TabItem } from '../ui/Tabs'
@@ -174,7 +175,7 @@ export function FileDetail({
             <Eraser className="size-3.5" aria-hidden="true" /> {item.clean ? 'Re-clean' : 'Clean'}
           </Button>
           {item.clean && (
-            <Button size="sm" onClick={() => downloadBlob(item.clean!.blob, item.clean!.filename)} disabled={item.status === 'cleaning'}>
+            <Button size="sm" onClick={() => downloadBlob(item.clean!.blob, outputName(item.clean!.filename))} disabled={item.status === 'cleaning'}>
               <Download className="size-3.5" aria-hidden="true" /> Download
             </Button>
           )}
