@@ -158,6 +158,7 @@ const FORMAT_DETAILS = [
   { f: 'MP3', d: 'ID3v2 / ID3v1 / APEv2 tags' },
   { f: 'WAV', d: 'LIST/INFO, bext, iXML, ID3, junk' },
   { f: 'MP4 / MOV', d: 'udta / meta / uuid boxes, re-validated' },
+  { f: 'PDF', d: 'Info dict, XMP, PieceInfo, utm_ link tags' },
 ]
 
 export function Features() {

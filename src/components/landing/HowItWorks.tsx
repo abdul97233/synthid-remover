@@ -13,7 +13,7 @@ const STEPS = [
   {
     icon: UploadCloud,
     title: 'Add your files',
-    body: 'Drag & drop images (JPG, PNG, WebP), audio (MP3, WAV) or video (MP4, MOV) or PDF documents. Files are read from disk straight into browser memory.',
+    body: 'Drag & drop images (JPG, PNG, WebP), audio (MP3, WAV), video (MP4, MOV) or PDF documents. Files are read from disk straight into browser memory.',
   },
   {
     icon: ScanSearch,

@@ -13,7 +13,7 @@ const TRUST = [
   { icon: Scale, label: 'Open source · MIT' },
 ]
 
-const FORMATS = ['JPG', 'PNG', 'WebP', 'MP3', 'WAV', 'MP4', 'MOV']
+const FORMATS = ['JPG', 'PNG', 'WebP', 'MP3', 'WAV', 'MP4', 'MOV', 'PDF']
 
 export function Hero() {
   const reduce = useReducedMotion()

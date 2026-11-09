@@ -31,7 +31,7 @@ const FAQS = [
   },
   {
     q: 'Which formats are supported?',
-    a: 'Images: JPG, PNG and WebP. Audio: MP3 and WAV. Video: MP4 and MOV. The MP4 cleaner refuses files it cannot prove safe — fragmented (moof) MP4s and any output that fails full re-parse validation are never produced.',
+    a: 'Images: JPG, PNG and WebP. Audio: MP3 and WAV. Video: MP4 and MOV. Documents: PDF (document info, XMP and utm_ link tracking such as utm_source=chatgpt.com are removed; password-protected PDFs are refused). The MP4 cleaner refuses files it cannot prove safe — fragmented (moof) MP4s and any output that fails full re-parse validation are never produced.',
   },
   {
     q: 'Is it really free? Where is the catch?',
